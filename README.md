@@ -9,7 +9,7 @@ This is not a standard XML deserializer. Its aim is reducing code as much as pos
 
 XmlConfigMapper requires Java 1.8 or later.
 
-##How to use
+## How to use
 
 ### Maven
 
@@ -23,7 +23,7 @@ For Maven-based projects, add the following to your POM file in order to use Xml
 ...
 <dependencies>
     <dependency>
-        <groupId>com.wooduan</groupId>
+        <groupId>com.github.shootmoon</groupId>
         <artifactId>xmlconfigmapper-core</artifactId>
         <version>${xmlconfigmapper.version}</version>
     </dependency>
@@ -40,7 +40,7 @@ For Maven-based projects, add the following to your POM file in order to use Xml
                 <target>1.8</target>
                 <annotationProcessorPaths>
                     <path>
-                        <groupId>com.wooduan</groupId>
+                        <groupId>com.github.shootmoon</groupId>
                         <artifactId>xmlconfigmapper-processor</artifactId>
                         <version>${xmlconfigmapper.version}</version>
                     </path>
@@ -60,10 +60,10 @@ For Gradle, you need something along the following lines:
 ...
 dependencies {
     ...
-    compile 'com.wooduan:xmlconfigmapper-core:0.1.1-SNAPSHOT'
+    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.1-SNAPSHOT'
 
-    annotationProcessor 'com.wooduan:xmlconfigmapper-processor:0.1.1-SNAPSHOT'
-    testAnnotationProcessor 'com.wooduan:xmlconfigmapper-processor:0.1.1-SNAPSHOT' // if you are using XmlConfigMapper in test code
+    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1-SNAPSHOT'
+    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1-SNAPSHOT' // if you are using XmlConfigMapper in test code
 }
 ...
 ```
