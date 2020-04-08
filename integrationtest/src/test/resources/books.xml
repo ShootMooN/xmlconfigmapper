@@ -1,0 +1,14 @@
+<catalog>
+    <id>1</id>
+    <books>
+        <book>
+            <pages>1|2|3</pages>
+        </book>
+        <book>
+            <pages>9|10</pages>
+        </book>
+        <book>
+            <pages>5</pages>
+        </book>
+    </books>
+</catalog>
