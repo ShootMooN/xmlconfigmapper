@@ -18,7 +18,7 @@ For Maven-based projects, add the following to your POM file in order to use Xml
 ```xml
 ...
 <properties>
-    <xmlconfigmapper.version>0.1.1-SNAPSHOT</xmlconfigmapper.version>
+    <xmlconfigmapper.version>0.1.1</xmlconfigmapper.version>
 </properties>
 ...
 <dependencies>
@@ -60,10 +60,10 @@ For Gradle, you need something along the following lines:
 ...
 dependencies {
     ...
-    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.1-SNAPSHOT'
+    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.1'
 
-    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1-SNAPSHOT'
-    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1-SNAPSHOT' // if you are using XmlConfigMapper in test code
+    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1'
+    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.1' // if you are using XmlConfigMapper in test code
 }
 ...
 ```
