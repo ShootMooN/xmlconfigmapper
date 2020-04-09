@@ -68,6 +68,12 @@ dependencies {
 ...
 ```
 
+## Read XML with one line
+
+```java
+Book book = new XmlConfigMapper.Builder().build().read("filePathToYouXml", Book.class);
+```
+
 ## Mark a class as model class
 
 To mark a class as deserializeable by `XmlConfigMapper` you have to annotate your model class with `@XmlConfigMapping`.
