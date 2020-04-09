@@ -5,7 +5,7 @@
     <groupId>com.github.shootmoon</groupId>
     <artifactId>xmlconfigmapper</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.2</version>
+    <version>0.1.3-SNAPSHOT</version>
     <name>XML Config Mapper ${project.version}</name>
     <description>An annotation processor for read XML</description>
     <url>https://github.com/ShootMooN/xmlconfigmapper</url>
@@ -147,7 +147,7 @@
         <connection>scm:git:git://github.com/ShootMooN/xmlconfigmapper.git</connection>
         <developerConnection>scm:git:git@github.com:ShootMooN/xmlconfigmapper.git</developerConnection>
         <url>https://github.com/ShootMooN/xmlconfigmapper</url>
-        <tag>xmlconfigmapper-0.1.2</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <profiles>
