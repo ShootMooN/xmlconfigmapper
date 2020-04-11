@@ -2,6 +2,7 @@ package com.github.shootmoon.xmlconfigmapper.processor.scan
 
 import com.github.shootmoon.xmlconfigmapper.core.annotation.Ignore
 import com.github.shootmoon.xmlconfigmapper.core.annotation.Property
+import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigMapping
 import com.github.shootmoon.xmlconfigmapper.core.converter.TypeConverter
 import com.github.shootmoon.xmlconfigmapper.processor.field.Field
 import com.github.shootmoon.xmlconfigmapper.processor.field.ListElementField
@@ -49,10 +50,20 @@ class AnnotationDetector(val elements: Elements, val types: Types)
         {
             val genericListType = getGenericTypeFromList(element)
             val genericListTypeElement = types.asElement(genericListType) as TypeElement
+            val genericListTypeAnnotation = genericListTypeElement.getAnnotation(XmlConfigMapping::class.java)
+            val elementName =
+                    if (genericListTypeAnnotation == null || genericListTypeAnnotation.name.isEmpty())
+                    {
+                        genericListTypeElement.simpleName.toString().decapitalize()
+                    }
+                    else
+                    {
+                        genericListTypeAnnotation.name
+                    }
 
             return ListElementField(
                     element,
-                    genericListTypeElement.simpleName.toString().decapitalize(),
+                    elementName,
                     genericListType)
 
         }

@@ -16,11 +16,10 @@ XmlConfigMapper requires Java 1.8 or later.
 For Maven-based projects, add the following to your POM file in order to use XmlConfigMapper:
 
 ```xml
-...
 <properties>
-    <xmlconfigmapper.version>0.1.2</xmlconfigmapper.version>
+    <xmlconfigmapper.version>0.1.3</xmlconfigmapper.version>
 </properties>
-...
+
 <dependencies>
     <dependency>
         <groupId>com.github.shootmoon</groupId>
@@ -28,7 +27,7 @@ For Maven-based projects, add the following to your POM file in order to use Xml
         <version>${xmlconfigmapper.version}</version>
     </dependency>
 </dependencies>
-...
+
 <build>
     <plugins>
         <plugin>
@@ -49,7 +48,6 @@ For Maven-based projects, add the following to your POM file in order to use Xml
         </plugin>
     </plugins>
 </build>
-...
 ```
 
 ### Gradle
@@ -57,15 +55,16 @@ For Maven-based projects, add the following to your POM file in order to use Xml
 For Gradle, you need something along the following lines:
 
 ```groovy
-...
-dependencies {
-    ...
-    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.2'
-
-    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.2'
-    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.2' // if you are using XmlConfigMapper in test code
+plugins {
+    id "net.ltgt.apt" version "0.21"
 }
-...
+
+dependencies {
+    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.3'
+
+    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.3'
+    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.3' // if you are using XmlConfigMapper in test code
+}
 ```
 
 ## Read XML with one line
@@ -82,7 +81,7 @@ To mark a class as deserializeable by `XmlConfigMapper` you have to annotate you
 @XmlConfigMapping(name = "book") // name is optional. Per default we use class name in lowercase
 public class Book {
 
-  String title; 
+    String title; 
 }
 ```
 
@@ -100,7 +99,7 @@ Reading the following XML(attribute is not supported):
 @XmlConfigMapping
 public class Book {
     
-  String id; 
+    String id; 
 }
 ```
 
@@ -121,22 +120,22 @@ Property field can read `String`, `Integer`, `Boolean`, `Long`, `Double`, `Local
 @XmlConfigMapping
 public class Book {
 
-  String id; 
-  
-  @Property(name = "publish_date", converter = MyDateConverter.class)
-  Date published; 
+    String id; 
+    
+    @Property(name = "publish_date", converter = MyDateConverter.class)
+    Date published; 
 }
 ```
 
 ```java
 public class MyDateConverter implements TypeConverter<Date> {
 
-  private SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd"); // SimpleDateFormat is not thread safe!
-
-  @Override
-  public Date read(String value) {
+    private SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd"); // SimpleDateFormat is not thread safe!
+    
+    @Override
+    public Date read(String value) {
     return formatter.parse(value);
-  }
+    }
 }
 ```
 
@@ -144,7 +143,41 @@ Your custom `TypeConverter` must provide an empty (parameter less) constructor).
 
 ## Element field
 
-In XML you can nest child element in elements. But here we only support to write child element like this:
+In XML you can nest child elements in element:
+
+```xml
+<store>
+    <book>
+        <id>1</id>
+    </book>
+    <book>
+        <id>2</id>
+    </book>
+    <book>
+        <id>3</id>
+    </book>
+</store>
+```
+
+```java
+@XmlConfigMapping
+public class Book {
+
+    String id;
+}
+
+@XmlConfigMapping
+public class Store {
+
+    List<Book> books;
+}
+```
+
+`XmlConfigMapper` will parse instances of `Book` automatically for you.
+
+## Path
+
+Sometimes you maybe want to put nest child elements under a specific element like this:
 
 ```xml
 <store>
@@ -162,18 +195,15 @@ In XML you can nest child element in elements. But here we only support to write
 </store>
 ```
 
+To parse that into java classes we would have to add a `Books` class. This isn't really memory efficient because we have to instantiate `Books` to access `<book>`. With `@Path` we can emulate this XML nodes:
+
 ```java
-@XmlConfigMapping
-public class Book {
-
-  String id;
-}
-
 @XmlConfigMapping
 public class Store {
 
-  List<Book> books;
+    @Path("books")
+    List<Book> books;
 }
 ```
 
-`XmlConfigMapper` will write and parse instances of `Book` automatically for you.
+`XmlConfigMapper` will read `<book>` without the extra cost of allocating such an object. 

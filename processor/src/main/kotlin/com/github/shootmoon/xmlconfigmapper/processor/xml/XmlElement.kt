@@ -21,17 +21,16 @@ interface XmlElement
     {
         var currentElement = this
 
-        if (toInsert.element.isList())
+        toInsert.element.getAnnotation(Path::class.java)?.let()
         {
-            val path =  toInsert.element.getAnnotation(Path::class.java)?.let { it.value } ?: toInsert.element.simpleName.toString()
-            val childElement = currentElement.childElements[path]
-            if(childElement != null)
+            val childElement = currentElement.childElements[it.value]
+            if (childElement != null)
             {
-                throw ProcessingException(toInsert.element, "Oops, duplicate $path. This should never happen.")
+                throw ProcessingException(toInsert.element, "Oops, duplicate ${it.value}. This should never happen.")
             }
 
-            val placeholderElement = PlaceholderXmlElement(path, currentElement.element)
-            (currentElement.childElements as MutableMap)[path] = placeholderElement
+            val placeholderElement = PlaceholderXmlElement(it.value, currentElement.element)
+            (currentElement.childElements as MutableMap)[it.value] = placeholderElement
             currentElement = placeholderElement
         }
 
