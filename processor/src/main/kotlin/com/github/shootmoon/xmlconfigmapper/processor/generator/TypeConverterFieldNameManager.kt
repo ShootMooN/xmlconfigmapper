@@ -7,7 +7,7 @@ import java.util.HashMap
  * @Description:
  * @Date: 2020/3/24 11:56
  */
-object CustomTypeConverterFieldNameManager
+object TypeConverterFieldNameManager
 {
     val converterMap: Map<String, String> = HashMap()
     private var fieldNameCounter = 1

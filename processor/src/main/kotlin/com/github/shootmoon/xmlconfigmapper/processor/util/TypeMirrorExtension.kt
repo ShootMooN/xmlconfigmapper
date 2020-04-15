@@ -10,4 +10,8 @@ import javax.lang.model.type.TypeMirror
  */
 
 
-fun TypeMirror.isBoolean() = kind == TypeKind.BOOLEAN || toString() == "java.lang.Boolean" || toString() == "kotlin.Boolean" || toString() == Boolean::class.qualifiedName || toString() == Boolean::class.java.canonicalName
+fun TypeMirror.isBoolean() = toString() == Boolean::class.java.canonicalName
+
+fun TypeMirror.isString() = toString() == String::class.java.canonicalName
+
+fun TypeMirror.isList() = toString().startsWith("java.util.List");

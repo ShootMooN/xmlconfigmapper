@@ -12,7 +12,6 @@ import com.github.shootmoon.xmlconfigmapper.core.converter.TypeConverterNotFound
  */
 public final class XmlConfigMapperContext
 {
-    private TypeConverters typeConverters = new TypeConverters();
     private TypeAdapters typeAdapters = new TypeAdapters();
 
     XmlConfigMapperContext(){}
@@ -20,10 +19,5 @@ public final class XmlConfigMapperContext
     public <T> TypeAdapter<T> getTypeAdapter(Class<T> clazz) throws TypeAdapterNotFoundException
     {
         return typeAdapters.get(clazz);
-    }
-
-    public <T> TypeConverter<T> getTypeConverter(Class<T> clazz) throws TypeConverterNotFoundException
-    {
-        return typeConverters.get(clazz);
     }
 }

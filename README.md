@@ -17,7 +17,7 @@ For Maven-based projects, add the following to your POM file in order to use Xml
 
 ```xml
 <properties>
-    <xmlconfigmapper.version>0.1.3</xmlconfigmapper.version>
+    <xmlconfigmapper.version>0.2.0</xmlconfigmapper.version>
 </properties>
 
 <dependencies>
@@ -60,25 +60,19 @@ plugins {
 }
 
 dependencies {
-    compile 'com.github.shootmoon:xmlconfigmapper-core:0.1.3'
+    compile 'com.github.shootmoon:xmlconfigmapper-core:0.2.0'
 
-    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.3'
-    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.1.3' // if you are using XmlConfigMapper in test code
+    annotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.2.0'
+    testAnnotationProcessor 'com.github.shootmoon:xmlconfigmapper-processor:0.2.0' // if you are using XmlConfigMapper in test code
 }
-```
-
-## Read XML with one line
-
-```java
-Book book = new XmlConfigMapper.Builder().build().read("filePathToYouXml", Book.class);
 ```
 
 ## Mark a class as model class
 
-To mark a class as deserializeable by `XmlConfigMapper` you have to annotate your model class with `@XmlConfigMapping`.
+To mark a class as deserializeable by `XmlConfigMapper` you have to annotate your model class with `@XmlConfigBean`.
 
 ```java
-@XmlConfigMapping(name = "book") // name is optional. Per default we use class name in lowercase
+@XmlConfigBean(name = "book") // name is optional. Per default we use class name in lowercase
 public class Book {
 
     String title; 
@@ -90,13 +84,15 @@ public class Book {
 Reading the following XML(attribute is not supported):
 
 ```xml
-<book>
-    <id>1</id>
-</book>
+<root>
+    <book>
+        <id>1</id>
+    </book>
+</root>
 ```
 
 ```java
-@XmlConfigMapping
+@XmlConfigBean
 public class Book {
     
     String id; 
@@ -110,14 +106,16 @@ Per default the field name will be used as name, but you can customize field wit
 Property field can read `String`, `Integer`, `Boolean`, `Long`, `Double`, `LocalDateTime`. You can also specify your own type converter that takes the xml text content as input and convert it to the desired type:
 
 ```xml
-<book>
-    <id>123</id>
-    <publish_date>2015-11-25</publish_date>
-</book>
+<root>
+    <book>
+        <id>123</id>
+        <publish_date>2015-11-25</publish_date>
+    </book>
+</root>
 ```
 
 ```java
-@XmlConfigMapping
+@XmlConfigBean
 public class Book {
 
     String id; 
@@ -146,27 +144,29 @@ Your custom `TypeConverter` must provide an empty (parameter less) constructor).
 In XML you can nest child elements in element:
 
 ```xml
-<store>
-    <book>
-        <id>1</id>
-    </book>
-    <book>
-        <id>2</id>
-    </book>
-    <book>
-        <id>3</id>
-    </book>
-</store>
+<root>
+    <store>
+        <book>
+            <id>1</id>
+        </book>
+        <book>
+            <id>2</id>
+        </book>
+        <book>
+            <id>3</id>
+        </book>
+    </store>
+</root>
 ```
 
 ```java
-@XmlConfigMapping
+@XmlConfigBean
 public class Book {
 
     String id;
 }
 
-@XmlConfigMapping
+@XmlConfigBean
 public class Store {
 
     List<Book> books;
@@ -180,25 +180,27 @@ public class Store {
 Sometimes you maybe want to put nest child elements under a specific element like this:
 
 ```xml
-<store>
-    <books>
-        <book>
-            <id>1</id>
-        </book>
-        <book>
-            <id>2</id>
-        </book>
-        <book>
-            <id>3</id>
-        </book>
-    </books>
-</store>
+<root>
+    <store>
+        <books>
+            <book>
+                <id>1</id>
+            </book>
+            <book>
+                <id>2</id>
+            </book>
+            <book>
+                <id>3</id>
+            </book>
+        </books>
+    </store>
+</root>
 ```
 
 To parse that into java classes we would have to add a `Books` class. This isn't really memory efficient because we have to instantiate `Books` to access `<book>`. With `@Path` we can emulate this XML nodes:
 
 ```java
-@XmlConfigMapping
+@XmlConfigBean
 public class Store {
 
     @Path("books")
@@ -207,3 +209,21 @@ public class Store {
 ```
 
 `XmlConfigMapper` will read `<book>` without the extra cost of allocating such an object. 
+
+## The mapper interface
+
+To generate a mapper for reading `Store` object, a mapper interface needs to be defined:
+
+```java
+@XmlConfigMapper
+public interface StoreMapper {
+    
+    MyMapper INSTANCE = XmlConfigMappers.getMapper(MyMapper.class);
+
+    @XmlConfigMapping
+    List<Store> getStoreList(String filePath);
+
+    //or just first element
+    @XmlConfigMapping
+    Store getStore(String filePath);
+}

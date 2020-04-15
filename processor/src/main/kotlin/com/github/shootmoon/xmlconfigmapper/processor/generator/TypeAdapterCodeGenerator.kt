@@ -31,7 +31,8 @@ class TypeAdapterCodeGenerator(private val filer: Filer, private val elements: E
                     xmlElement.generateReadXmlCode(codeGenUtils))
         }
 
-        val adapterClassBuilder = TypeSpec.classBuilder(annotatedClass.simpleClassName + TypeAdapter.GENERATED_CLASS_SUFFIX)
+        val adapterClassSimpleName = annotatedClass.simpleClassName + TypeAdapter.GENERATED_CLASS_SUFFIX
+        val adapterClassBuilder = TypeSpec.classBuilder(adapterClassSimpleName)
                 .addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(genericParamTypeAdapter)
 
@@ -64,7 +65,7 @@ class TypeAdapterCodeGenerator(private val filer: Filer, private val elements: E
         }
 
         // Add fields from TypeConverter
-        for ((qualifiedConverterClass, fieldName) in CustomTypeConverterFieldNameManager.converterMap)
+        for ((qualifiedConverterClass, fieldName) in TypeConverterFieldNameManager.converterMap)
         {
             val converterClassName = ClassName.get(elements.getTypeElement(qualifiedConverterClass))
             adapterClassBuilder.addField(FieldSpec.builder(converterClassName, fieldName, Modifier.PRIVATE).initializer("new \$T()", converterClassName).build())

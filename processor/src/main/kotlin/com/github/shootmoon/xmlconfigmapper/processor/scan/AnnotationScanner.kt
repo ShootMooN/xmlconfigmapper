@@ -90,8 +90,7 @@ class AnnotationScanner(private val annotationDetector: AnnotationDetector)
         {
             is XmlChildElement -> annotatedClass.addChildElement(field)
 
-            else                                                                                     -> throw IllegalArgumentException(
-                    "Oops, unexpected element type $field. This should never happen.")
+            else               -> throw IllegalArgumentException("Oops, unexpected element type $field. This should never happen.")
         }
     }
 

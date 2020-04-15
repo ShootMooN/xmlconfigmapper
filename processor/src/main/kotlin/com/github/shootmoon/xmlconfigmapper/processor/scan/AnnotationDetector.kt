@@ -2,7 +2,7 @@ package com.github.shootmoon.xmlconfigmapper.processor.scan
 
 import com.github.shootmoon.xmlconfigmapper.core.annotation.Ignore
 import com.github.shootmoon.xmlconfigmapper.core.annotation.Property
-import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigMapping
+import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigBean
 import com.github.shootmoon.xmlconfigmapper.core.converter.TypeConverter
 import com.github.shootmoon.xmlconfigmapper.processor.field.Field
 import com.github.shootmoon.xmlconfigmapper.processor.field.ListElementField
@@ -14,7 +14,6 @@ import javax.lang.model.element.*
 import javax.lang.model.type.*
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
-import kotlin.collections.HashSet
 
 /**
  * @Author: longheng
@@ -23,7 +22,7 @@ import kotlin.collections.HashSet
  */
 class AnnotationDetector(val elements: Elements, val types: Types)
 {
-    private var converterTypeNamesSet: HashSet<String>? = null
+    private var embeddedTypeConverterCacheMap: Map<String, String>? = null
 
     fun isXmlField(element: VariableElement): Field?
     {
@@ -40,17 +39,14 @@ class AnnotationDetector(val elements: Elements, val types: Types)
                     getQualifiedConverterName(element, propertyAnnotation))
         }
 
-        if (containsTypeConverter(element.asType().toString()))
-        {
-            return PropertyField(element, element.simpleName.toString())
-        }
+        getEmbeddedTypeConverter(element.asType().toString())?.let { return PropertyField(element, element.simpleName.toString(), it) }
 
         //ChildElement mush in List
         if (element.isList())
         {
             val genericListType = getGenericTypeFromList(element)
             val genericListTypeElement = types.asElement(genericListType) as TypeElement
-            val genericListTypeAnnotation = genericListTypeElement.getAnnotation(XmlConfigMapping::class.java)
+            val genericListTypeAnnotation = genericListTypeElement.getAnnotation(XmlConfigBean::class.java)
             val elementName =
                     if (genericListTypeAnnotation == null || genericListTypeAnnotation.name.isEmpty())
                     {
@@ -82,7 +78,7 @@ class AnnotationDetector(val elements: Elements, val types: Types)
                 property.name
             }
 
-    private fun getQualifiedConverterName(element: Element, annotation: Property): String?
+    private fun getQualifiedConverterName(element: javax.lang.model.element.Element, annotation: Property): String
     {
         try
         {
@@ -91,7 +87,8 @@ class AnnotationDetector(val elements: Elements, val types: Types)
             // No type converter
             if (converterClass == TypeConverter.NoneTypeConverter::class.java)
             {
-                null
+                return getEmbeddedTypeConverter(element.asType().toString()) ?:
+                    throw ProcessingException(element, "Can not find type converter for ${element.asType()}!")
             }
 
             // Class must be public
@@ -133,7 +130,8 @@ class AnnotationDetector(val elements: Elements, val types: Types)
 
             if (typeMirror.toString() == TypeConverter.NoneTypeConverter::class.qualifiedName)
             {
-                return null
+                return getEmbeddedTypeConverter(element.asType().toString()) ?:
+                    throw ProcessingException(element, "Can not find type converter for ${element.asType()}!")
             }
 
             if (typeMirror.kind != TypeKind.DECLARED)
@@ -172,20 +170,34 @@ class AnnotationDetector(val elements: Elements, val types: Types)
         }
     }
 
-    private fun containsTypeConverter(typeString: String): Boolean
+    private fun getEmbeddedTypeConverter(typeString: String): String?
     {
-        if (converterTypeNamesSet == null)
+        if (embeddedTypeConverterCacheMap == null)
         {
-            converterTypeNamesSet = elements.getPackageElement(TypeConverter::class.java.`package`.name)
-                    .enclosedElements.filterIsInstance<TypeElement>()
-                    .flatMap { it.interfaces }
-                    .filterIsInstance<DeclaredType>()
-                    .filter { (it.asElement() as TypeElement).qualifiedName.toString().equals(TypeConverter::class.qualifiedName) }
-                    .map { it.typeArguments[0].toString() }
-                    .toHashSet()
+            embeddedTypeConverterCacheMap = elements.getPackageElement(TypeConverter::class.java.`package`.name)
+                    .enclosedElements
+                    .filterIsInstance<TypeElement>()
+                    .map {
+                        it.interfaces
+                            .filterIsInstance<DeclaredType>()
+                            .firstOrNull {
+                                (it.asElement() as TypeElement)
+                                    .qualifiedName.toString()
+                                    .equals(TypeConverter::class.qualifiedName)
+                            }?.typeArguments?.get(0).toString() to
+                        it.toString()
+                    }.toMap()
+//
+//
+//
+//                    .flatMap { it.interfaces }
+//                    .filterIsInstance<DeclaredType>()
+//                    .filter { (it.asElement() as TypeElement).qualifiedName.toString().equals(TypeConverter::class.qualifiedName) }
+//                    .map { it.typeArguments[0].toString() }
+//                    .toHashSet()
         }
 
-        return converterTypeNamesSet?.contains(typeString) ?: false
+        return embeddedTypeConverterCacheMap!![typeString]
     }
 
     private fun getGenericTypeFromList(listVariableElement: VariableElement): TypeMirror
@@ -200,19 +212,19 @@ class AnnotationDetector(val elements: Elements, val types: Types)
         {
             0    -> elements.getTypeElement("java.lang.Object").asType() // Raw types
             1    -> if (typeMirror.typeArguments[0].kind == TypeKind.WILDCARD)
-            {
-                val wildCardMirror = typeMirror.typeArguments[0] as WildcardType
-                when
-                {
-                    wildCardMirror.extendsBound != null -> wildCardMirror.extendsBound
-                    wildCardMirror.superBound != null   -> wildCardMirror.superBound
-                    else                                -> elements.getTypeElement("java.lang.Object").asType()
-                }
-            }
-            else
-            {
-                typeMirror.typeArguments[0]
-            }
+                    {
+                        val wildCardMirror = typeMirror.typeArguments[0] as WildcardType
+                        when
+                        {
+                            wildCardMirror.extendsBound != null -> wildCardMirror.extendsBound
+                            wildCardMirror.superBound != null   -> wildCardMirror.superBound
+                            else                                -> elements.getTypeElement("java.lang.Object").asType()
+                        }
+                    }
+                    else
+                    {
+                        typeMirror.typeArguments[0]
+                    }
             else -> throw ProcessingException(listVariableElement, "You have annotated a List with more than one generic argument!")
         }
     }

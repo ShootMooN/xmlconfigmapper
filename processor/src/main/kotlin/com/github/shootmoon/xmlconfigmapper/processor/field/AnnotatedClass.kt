@@ -1,10 +1,9 @@
 package com.github.shootmoon.xmlconfigmapper.processor.field
 
-import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigMapping
+import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigBean
 import com.github.shootmoon.xmlconfigmapper.processor.util.ProcessingException
 import com.github.shootmoon.xmlconfigmapper.processor.xml.XmlChildElement
 import com.github.shootmoon.xmlconfigmapper.processor.xml.XmlRootElement
-import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 
 /**
@@ -12,9 +11,8 @@ import javax.lang.model.element.TypeElement
  * @Description:
  * @Date: 2020/3/25 11:24
  */
-class AnnotatedClass @Throws(ProcessingException::class) constructor(e: Element) : XmlRootElement
+class AnnotatedClass @Throws(ProcessingException::class) constructor(override val element: TypeElement) : XmlRootElement
 {
-    override val element: TypeElement
     override val nameAsRoot: String
     val simpleClassName: String
     val qualifiedClassName: String
@@ -22,14 +20,13 @@ class AnnotatedClass @Throws(ProcessingException::class) constructor(e: Element)
 
     init
     {
-        element = e as TypeElement
         simpleClassName = element.simpleName.toString()
         qualifiedClassName = element.qualifiedName.toString()
 
-        val xmlAnnotation = element.getAnnotation(XmlConfigMapping::class.java)
+        val xmlAnnotation = element.getAnnotation(XmlConfigBean::class.java)
 
         nameAsRoot =
-                if (xmlAnnotation.name.isEmpty())
+                if (xmlAnnotation == null || xmlAnnotation.name.isEmpty())
                 {
                     simpleClassName.decapitalize()
                 }

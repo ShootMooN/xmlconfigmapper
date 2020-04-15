@@ -38,19 +38,11 @@ class CodeGeneratorHelper(val valueType: ClassName)
                     .addParameter(XmlConfigMapperContext::class.java, contextParam)
                     .addException(IOException::class.java)
 
-    fun assignViaTypeConverter(element: Element, accessResolver: FieldAccessResolver, customTypeConverterQualifiedClassName: String?) =
-        when
-        {
-            customTypeConverterQualifiedClassName != null ->
-            {
-                val fieldName = CustomTypeConverterFieldNameManager.getFieldNameForConverter(customTypeConverterQualifiedClassName)
-                accessResolver.resolveSetter("$fieldName.read($elementParam.getText())")
-            }
-            else ->
-            {
-                accessResolver.resolveSetter("$contextParam.getTypeConverter(%s.class).read($elementParam.getText())".format(element.asType()))
-            }
-        }
+    fun assignViaTypeConverter(element: Element, accessResolver: FieldAccessResolver, customTypeConverterQualifiedClassName: String) : CodeBlock
+    {
+        val fieldName = TypeConverterFieldNameManager.getFieldNameForConverter(customTypeConverterQualifiedClassName)
+        return accessResolver.resolveSetter("$fieldName.read($elementParam.getText())")
+    }
 
     fun generateNestedChildElementBinder(element: XmlElement): TypeSpec
     {

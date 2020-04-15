@@ -11,7 +11,8 @@ import java.lang.annotation.Target;
  * @Date: 2020/3/17 15:06
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.METHOD)
-public @interface XmlConfigMapping
+@Target(ElementType.TYPE)
+public @interface XmlConfigBean
 {
+    String name() default "";
 }

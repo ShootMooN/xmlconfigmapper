@@ -1,11 +1,9 @@
 package com.github.shootmoon.xmlconfigmapper.itest;
 
-import com.github.shootmoon.xmlconfigmapper.core.XmlConfigMapper;
-import org.dom4j.DocumentException;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * @Author: longheng
@@ -15,12 +13,15 @@ import java.net.URL;
 public class MappingTest
 {
     @Test
-    public void test1() throws IOException, DocumentException
+    public void test1()
     {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL url = classLoader.getResource("books.xml");
 
-        Catalogue catalogue = new XmlConfigMapper.Builder().build().read(url.getFile(), Catalogue.class);
+        List<Catalogue> catalogues = MyMapper.INSTANCE.getCatalogueList(url.getFile());
+
+        Catalogue catalogue = MyMapper.INSTANCE.getCatalogue(url.getFile());
+
         System.out.println();
     }
 }

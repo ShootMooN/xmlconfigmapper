@@ -1,11 +1,9 @@
 package com.github.shootmoon.xmlconfigmapper.processor;
 
-import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigMapping;
+import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigBean;
+import com.github.shootmoon.xmlconfigmapper.core.annotation.XmlConfigMapper;
 import com.github.shootmoon.xmlconfigmapper.processor.field.AnnotatedClass;
-import com.github.shootmoon.xmlconfigmapper.processor.generator.TypeAdapterCodeGenerator;
-import com.github.shootmoon.xmlconfigmapper.processor.scan.AnnotationDetector;
-import com.github.shootmoon.xmlconfigmapper.processor.scan.AnnotationScanner;
-import com.github.shootmoon.xmlconfigmapper.processor.field.AnnotatedClass;
+import com.github.shootmoon.xmlconfigmapper.processor.generator.MapperCodeGenerator;
 import com.github.shootmoon.xmlconfigmapper.processor.generator.TypeAdapterCodeGenerator;
 import com.github.shootmoon.xmlconfigmapper.processor.scan.AnnotationDetector;
 import com.github.shootmoon.xmlconfigmapper.processor.scan.AnnotationScanner;
@@ -43,7 +41,8 @@ public class MappingProcessor extends AbstractProcessor
     public Set<String> getSupportedAnnotationTypes()
     {
         Set<String> types = new HashSet<>();
-        types.add(XmlConfigMapping.class.getCanonicalName());
+        types.add(XmlConfigMapper.class.getCanonicalName());
+        types.add(XmlConfigBean.class.getCanonicalName());
         return types;
     }
 
@@ -69,21 +68,33 @@ public class MappingProcessor extends AbstractProcessor
     {
         try
         {
-            AnnotationScanner scanner = new AnnotationScanner(annotationDetector);
-
-            Set<? extends Element> configElements = roundEnv.getElementsAnnotatedWith(XmlConfigMapping.class);
-            for (Element element : configElements)
+            //Generate type adaptor
+            AnnotationScanner annotationScanner = new AnnotationScanner(annotationDetector);
+            TypeAdapterCodeGenerator typeAdapterCodeGenerator = new  TypeAdapterCodeGenerator(filer, elements, types);
+            Set<? extends Element> configBeanElements = roundEnv.getElementsAnnotatedWith(XmlConfigBean.class);
+            for (Element configBeanElement : configBeanElements)
             {
-                if (element.getKind() != ElementKind.CLASS || element.getModifiers().contains(Modifier.ABSTRACT))
+                if (configBeanElement.getKind() != ElementKind.CLASS || configBeanElement.getModifiers().contains(Modifier.ABSTRACT))
                 {
                     continue;
                 }
 
-                AnnotatedClass clazz = new AnnotatedClass(element);
-                scanner.scan(clazz);
+                AnnotatedClass clazz = new AnnotatedClass((TypeElement) configBeanElement);
+                annotationScanner.scan(clazz);
+                typeAdapterCodeGenerator.generateCode(clazz);
+            }
 
-                TypeAdapterCodeGenerator generator = new TypeAdapterCodeGenerator(filer, elements, types);
-                generator.generateCode(clazz);
+            //Generate mapper implement class
+            MapperCodeGenerator mapperCodeGenerator = new MapperCodeGenerator(filer, elements, types);
+            Set<? extends Element> configElements = roundEnv.getElementsAnnotatedWith(XmlConfigMapper.class);
+            for (Element element : configElements)
+            {
+                if (element.getKind() != ElementKind.INTERFACE)
+                {
+                    continue;
+                }
+
+                mapperCodeGenerator.generateCode((TypeElement)element);
             }
         }
         catch (Exception e)

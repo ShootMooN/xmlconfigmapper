@@ -11,7 +11,7 @@ import javax.lang.model.element.VariableElement
  * @Description:
  * @Date: 2020/3/23 20:47
  */
-class PropertyField(element: VariableElement, name: String, val converterQualifiedName: String? = null): Field(element, name), XmlChildElement
+class PropertyField(element: VariableElement, name: String, val converterQualifiedName: String): Field(element, name), XmlChildElement
 {
     override val childElements = LinkedHashMap<String, XmlChildElement>()
 
