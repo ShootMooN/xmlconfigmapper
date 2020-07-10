@@ -187,17 +187,31 @@ class AnnotationDetector(val elements: Elements, val types: Types)
                             }?.typeArguments?.get(0).toString() to
                         it.toString()
                     }.toMap()
-//
-//
-//
-//                    .flatMap { it.interfaces }
-//                    .filterIsInstance<DeclaredType>()
-//                    .filter { (it.asElement() as TypeElement).qualifiedName.toString().equals(TypeConverter::class.qualifiedName) }
-//                    .map { it.typeArguments[0].toString() }
-//                    .toHashSet()
         }
 
-        return embeddedTypeConverterCacheMap!![typeString]
+        when (typeString)
+        {
+            "int"     ->
+            {
+                return embeddedTypeConverterCacheMap!!["java.lang.Integer"]
+            }
+            "long"    ->
+            {
+                return embeddedTypeConverterCacheMap!!["java.lang.Long"]
+            }
+            "double"  ->
+            {
+                return embeddedTypeConverterCacheMap!!["java.lang.Double"]
+            }
+            "boolean" ->
+            {
+                return embeddedTypeConverterCacheMap!!["java.lang.Boolean"]
+            }
+            else      ->
+            {
+                return embeddedTypeConverterCacheMap!![typeString]
+            }
+        }
     }
 
     private fun getGenericTypeFromList(listVariableElement: VariableElement): TypeMirror

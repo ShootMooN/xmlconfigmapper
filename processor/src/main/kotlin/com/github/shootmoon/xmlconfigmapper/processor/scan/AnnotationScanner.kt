@@ -49,7 +49,7 @@ class AnnotationScanner(private val annotationDetector: AnnotationDetector)
             {
                 methodsMap[it.simpleName.toString()] = it as ExecutableElement
             }
-            else if (it.isField())
+            else if (it.isField() && (!it.isStatic() || !it.isFinal()))
             {
                 fillAnnotatedClass(annotatedClass, it as VariableElement, checkAccessPolicyOrDeferGetterSetterCheck)
             }

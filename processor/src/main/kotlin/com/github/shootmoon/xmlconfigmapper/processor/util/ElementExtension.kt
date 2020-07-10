@@ -28,6 +28,10 @@ fun Element.isMethod() = kind == ElementKind.METHOD
 
 fun Element.isField() = kind == ElementKind.FIELD
 
+fun Element.isStatic() = modifiers.contains(Modifier.STATIC)
+
+fun Element.isFinal() = modifiers.contains(Modifier.FINAL)
+
 fun Element.isPublic() = modifiers.contains(Modifier.PUBLIC)
 
 fun Element.isPrivate() = modifiers.contains(Modifier.PRIVATE)
